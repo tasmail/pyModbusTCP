@@ -12,7 +12,6 @@ import random
 
 
 class ModbusClient:
-
     """Modbus TCP client"""
 
     def __init__(self, host=None, port=None, unit_id=None, timeout=None,
@@ -46,14 +45,14 @@ class ModbusClient:
         self.__hostname = 'localhost'
         self.__port = const.MODBUS_PORT
         self.__unit_id = 1
-        self.__timeout = 30.0                # socket timeout
-        self.__debug = False                 # debug trace on/off
-        self.__auto_open = False             # auto TCP connect
-        self.__auto_close = False            # auto TCP close
-        self.__mode = const.MODBUS_TCP       # default is Modbus/TCP
-        self.__sock = None                   # socket handle
-        self.__hd_tr_id = 0                  # store transaction ID
-        self.__version = const.VERSION       # version number
+        self.__timeout = 30.0  # socket timeout
+        self.__debug = False  # debug trace on/off
+        self.__auto_open = False  # auto TCP connect
+        self.__auto_close = False  # auto TCP close
+        self.__mode = const.MODBUS_TCP  # default is Modbus/TCP
+        self.__sock = None  # socket handle
+        self.__hd_tr_id = 0  # store transaction ID
+        self.__version = const.VERSION  # version number
         self.__last_error = const.MB_NO_ERR  # last error code
         self.__last_except = const.EXP_NONE  # last expect code
         # set host
@@ -329,13 +328,15 @@ class ModbusClient:
         else:
             return None
 
-    def read_coils(self, bit_addr, bit_nb=1):
+    def read_coils(self, bit_addr, bit_nb=1, unit_id=None):
         """Modbus function READ_COILS (0x01)
 
         :param bit_addr: bit address (0 to 65535)
         :type bit_addr: int
         :param bit_nb: number of bits to read (1 to 2000)
         :type bit_nb: int
+        :param unit_id: modbus unit id
+        :type unit_id: int
         :returns: bits list or None if error
         :rtype: list of bool or None
         """
@@ -351,7 +352,7 @@ class ModbusClient:
             return None
         # build frame
         tx_buffer = self._mbus_frame(
-            const.READ_COILS, struct.pack('>HH', bit_addr, bit_nb))
+            const.READ_COILS, struct.pack('>HH', bit_addr, bit_nb), unit_id)
         # send request
         s_send = self._send_mbus(tx_buffer)
         # check error
@@ -387,13 +388,15 @@ class ModbusClient:
         # return bits list
         return bits
 
-    def read_discrete_inputs(self, bit_addr, bit_nb=1):
+    def read_discrete_inputs(self, bit_addr, bit_nb=1, unit_id=None):
         """Modbus function READ_DISCRETE_INPUTS (0x02)
 
         :param bit_addr: bit address (0 to 65535)
         :type bit_addr: int
         :param bit_nb: number of bits to read (1 to 2000)
         :type bit_nb: int
+        :param unit_id: modbus unit id
+        :type unit_id: int
         :returns: bits list or None if error
         :rtype: list of bool or None
         """
@@ -409,7 +412,7 @@ class ModbusClient:
             return None
         # build frame
         tx_buffer = self._mbus_frame(
-            const.READ_DISCRETE_INPUTS, struct.pack('>HH', bit_addr, bit_nb))
+            const.READ_DISCRETE_INPUTS, struct.pack('>HH', bit_addr, bit_nb), unit_id)
         # send request
         s_send = self._send_mbus(tx_buffer)
         # check error
@@ -445,13 +448,15 @@ class ModbusClient:
         # return bits list
         return bits
 
-    def read_holding_registers(self, reg_addr, reg_nb=1):
+    def read_holding_registers(self, reg_addr, reg_nb=1, unit_id=None):
         """Modbus function READ_HOLDING_REGISTERS (0x03)
 
         :param reg_addr: register address (0 to 65535)
         :type reg_addr: int
         :param reg_nb: number of registers to read (1 to 125)
         :type reg_nb: int
+        :param unit_id: modbus unit id
+        :type unit_id: int
         :returns: registers list or None if fail
         :rtype: list of int or None
         """
@@ -467,7 +472,7 @@ class ModbusClient:
             return None
         # build frame
         tx_buffer = self._mbus_frame(
-            const.READ_HOLDING_REGISTERS, struct.pack('>HH', reg_addr, reg_nb))
+            const.READ_HOLDING_REGISTERS, struct.pack('>HH', reg_addr, reg_nb), unit_id)
         # send request
         s_send = self._send_mbus(tx_buffer)
         # check error
@@ -505,13 +510,15 @@ class ModbusClient:
         # return registers list
         return registers
 
-    def read_input_registers(self, reg_addr, reg_nb=1):
+    def read_input_registers(self, reg_addr, reg_nb=1, unit_id=None):
         """Modbus function READ_INPUT_REGISTERS (0x04)
 
         :param reg_addr: register address (0 to 65535)
         :type reg_addr: int
         :param reg_nb: number of registers to read (1 to 125)
         :type reg_nb: int
+        :param unit_id: id of the unit
+        :type unit_id: int
         :returns: registers list or None if fail
         :rtype: list of int or None
         """
@@ -527,7 +534,7 @@ class ModbusClient:
             return None
         # build frame
         tx_buffer = self._mbus_frame(
-            const.READ_INPUT_REGISTERS, struct.pack('>HH', reg_addr, reg_nb))
+            const.READ_INPUT_REGISTERS, struct.pack('>HH', reg_addr, reg_nb), unit_id)
         # send request
         s_send = self._send_mbus(tx_buffer)
         # check error
@@ -563,13 +570,15 @@ class ModbusClient:
         # return registers list
         return registers
 
-    def write_single_coil(self, bit_addr, bit_value):
+    def write_single_coil(self, bit_addr, bit_value, unit_id=None):
         """Modbus function WRITE_SINGLE_COIL (0x05)
 
         :param bit_addr: bit address (0 to 65535)
         :type bit_addr: int
         :param bit_value: bit value to write
         :type bit_value: bool
+        :param unit_id: modbus unit id
+        :type unit_id: int
         :returns: True if write ok or None if fail
         :rtype: bool or None
         """
@@ -580,7 +589,7 @@ class ModbusClient:
         # build frame
         bit_value = 0xFF if bit_value else 0x00
         tx_buffer = self._mbus_frame(
-            const.WRITE_SINGLE_COIL, struct.pack('>HBB', bit_addr, bit_value, 0))
+            const.WRITE_SINGLE_COIL, struct.pack('>HBB', bit_addr, bit_value, 0), unit_id)
         # send request
         s_send = self._send_mbus(tx_buffer)
         # check error
@@ -604,13 +613,15 @@ class ModbusClient:
         is_ok = (rx_bit_addr == bit_addr) and (rx_bit_value == bit_value)
         return True if is_ok else None
 
-    def write_single_register(self, reg_addr, reg_value):
+    def write_single_register(self, reg_addr, reg_value, unit_id=None):
         """Modbus function WRITE_SINGLE_REGISTER (0x06)
 
         :param reg_addr: register address (0 to 65535)
         :type reg_addr: int
         :param reg_value: register value to write
         :type reg_value: int
+        :param unit_id: modbus unit id
+        :type unit_id: int
         :returns: True if write ok or None if fail
         :rtype: bool or None
         """
@@ -623,7 +634,7 @@ class ModbusClient:
             return None
         # build frame
         tx_buffer = self._mbus_frame(const.WRITE_SINGLE_REGISTER,
-                                     struct.pack('>HH', reg_addr, reg_value))
+                                     struct.pack('>HH', reg_addr, reg_value), unit_id)
         # send request
         s_send = self._send_mbus(tx_buffer)
         # check error
@@ -646,13 +657,15 @@ class ModbusClient:
         is_ok = (rx_reg_addr == reg_addr) and (rx_reg_value == reg_value)
         return True if is_ok else None
 
-    def write_multiple_coils(self, bits_addr, bits_value):
+    def write_multiple_coils(self, bits_addr, bits_value, unit_id=None):
         """Modbus function WRITE_MULTIPLE_COILS (0x0F)
 
         :param bits_addr: bits address (0 to 65535)
         :type bits_addr: int
         :param bits_value: bits values to write
         :type bits_value: list
+        :param unit_id: modbus unit id
+        :type unit_id: int
         :returns: True if write ok or None if fail
         :rtype: bool or None
         """
@@ -679,7 +692,7 @@ class ModbusClient:
         # populate bytes list with bits_value
         for i, item in enumerate(bits_value):
             if item:
-                byte_i = int(i/8)
+                byte_i = int(i / 8)
                 bytes_l[byte_i] = set_bit(bytes_l[byte_i], i % 8)
         # format bits_val_str
         for byte in bytes_l:
@@ -687,7 +700,7 @@ class ModbusClient:
         bytes_nb = len(bits_val_str)
         # format modbus frame body
         body = struct.pack('>HHB', bits_addr, bits_nb, bytes_nb) + bits_val_str
-        tx_buffer = self._mbus_frame(const.WRITE_MULTIPLE_COILS, body)
+        tx_buffer = self._mbus_frame(const.WRITE_MULTIPLE_COILS, body, unit_id)
         # send request
         s_send = self._send_mbus(tx_buffer)
         # check error
@@ -710,13 +723,15 @@ class ModbusClient:
         is_ok = (rx_bit_addr == bits_addr)
         return True if is_ok else None
 
-    def write_multiple_registers(self, regs_addr, regs_value):
+    def write_multiple_registers(self, regs_addr, regs_value, unit_id=None):
         """Modbus function WRITE_MULTIPLE_REGISTERS (0x10)
 
         :param regs_addr: registers address (0 to 65535)
         :type regs_addr: int
         :param regs_value: registers values to write
         :type regs_value: list
+        :param unit_id: modbus unit id
+        :type unit_id: int
         :returns: True if write ok or None if fail
         :rtype: bool or None
         """
@@ -749,7 +764,7 @@ class ModbusClient:
         bytes_nb = len(regs_val_str)
         # format modbus frame body
         body = struct.pack('>HHB', regs_addr, regs_nb, bytes_nb) + regs_val_str
-        tx_buffer = self._mbus_frame(const.WRITE_MULTIPLE_REGISTERS, body)
+        tx_buffer = self._mbus_frame(const.WRITE_MULTIPLE_REGISTERS, body, unit_id)
         # send request
         s_send = self._send_mbus(tx_buffer)
         # check error
@@ -985,13 +1000,15 @@ class ModbusClient:
             # return
             return f_body
 
-    def _mbus_frame(self, fc, body):
+    def _mbus_frame(self, fc, body, unit_id):
         """Build modbus frame (add MBAP for Modbus/TCP, slave AD + CRC for RTU)
 
         :param fc: modbus function code
         :type fc: int
         :param body: modbus frame body
         :type body: str (Python2) or class bytes (Python3)
+        :param unit_id: modbus unit id
+        :type unit_id: int
         :returns: modbus frame
         :rtype: str (Python2) or class bytes (Python3)
         """
@@ -1004,12 +1021,12 @@ class ModbusClient:
             tx_hd_pr_id = 0
             tx_hd_length = len(f_body) + 1
             f_mbap = struct.pack('>HHHB', self.__hd_tr_id, tx_hd_pr_id,
-                                 tx_hd_length, self.__unit_id)
+                                 tx_hd_length, unit_id if unit_id is not None else self.__unit_id)
             return f_mbap + f_body
         # modbus RTU
         elif self.__mode == const.MODBUS_RTU:
             # format [slave addr(unit_id)]frame_body[CRC16]
-            slave_ad = struct.pack('B', self.__unit_id)
+            slave_ad = struct.pack('B', unit_id if unit_id is not None else self.__unit_id)
             return self._add_crc(slave_ad + f_body)
 
     def _pretty_dump(self, label, data):

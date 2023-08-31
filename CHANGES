@@ -1,5 +1,11 @@
 Revision history for pyModbusTCP
 
+0.1.12 2023-09-31
+    - unit_id parameter added to all client read/write functions
+
+0.1.11 2021-12-22
+    - _recv_mbus updated. RTU mode correct receive for functions 0x05,0x06,0x10
+
 0.1.10 2021-03-02
 
     - word_list_to_long() and long_list_to_word(), now support 64 bits long long with opt long_long.
